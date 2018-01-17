@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 # COPY server.py /src/server.py
 
 EXPOSE  3000
-CMD ["python", "/src/server.py", "-p 8000"]
+CMD ["python", "-u", "/src/server.py"]
