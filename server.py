@@ -21,7 +21,8 @@ class S(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self._set_headers()
-        self.wfile.write("<html><body><h1>{0}</h1><p>{1}</p></body></html>")
+        response = "<html><body><h1>HTTP Server</h1><p>Jonathan Ferraro</p></body></html>"
+        self.wfile.write(response)
 
     def do_HEAD(self):
         self._set_headers()
@@ -34,11 +35,13 @@ class S(BaseHTTPRequestHandler):
                           % ( self.command, self.path, self.headers.items() ) )
         if self.headers.has_key('content-length'):
             length= int(self.headers['content-length'])
-            self.log_message('Length of content: %s') % int(self.headers['content-length'])
+            self.log_message('Length of content: {0}'.format(int(self.headers['content-length'])))
             self.ingest_vlpro_alarm(self.rfile.read(length))
         else:
             self.ingest_vlpro_alarm(None)
-    def ingest_vlpro_alarm(self, formInput=None):
+    def ingest_vlpro_alarm(self, moth):
+        self.log_message('Print Moth: {0}'.format(moth))
+        # formInput=None
         #Take the alert from VLPro
         response= "<html><head></head><body>"
         response+= "<p>HTTP Request</p>"
