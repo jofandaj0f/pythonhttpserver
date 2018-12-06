@@ -6,5 +6,5 @@ services:
      - "3000:3000"
     volumes:
       - type: bind
-        source: '/AsRun'
-        target: '/tmp/AsRun'
+        source: ./AsRun
+        target: /tmp/AsRun
