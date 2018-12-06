@@ -63,10 +63,10 @@ if __name__ == "__main__":
     from sys import argv
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(message)s',
-    #                     datefmt='%Y-%m-%d %H:%M:%S')
+                        datefmt='%Y-%m-%d %H:%M:%S')
     path = '/AsRun' #sys.argv[1] if len(sys.argv) > 1 else '.'
     event_handler = LoggingEventHandler()
-    observer = Observer()
+    observer = Observer(
     observer.schedule(event_handler, path, recursive=True)
     observer.start()
     try:
