@@ -11,7 +11,10 @@ Send a POST request::
     curl -d "foo=bar&bin=baz" http://localhost
 """
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-import SocketServer
+import SocketServe, sys, time, logging
+from watchdog.observers import Observer
+from watchdog.events import LoggingEventHandler
+from watchdog.events import PatternMatchingEventHandler
 
 class S(BaseHTTPRequestHandler):
     def _set_headers(self):
@@ -28,27 +31,27 @@ class S(BaseHTTPRequestHandler):
         self._set_headers()
 
     def do_POST(self):
-        # Doesn't do anything with posted data
         self._set_headers()
-        # self.wfile.write("<html><body><h1>POST!</h1></body></html>")
-        self.log_message( "Command: %s Path: %s Headers: %r"
-                          % ( self.command, self.path, self.headers.items() ) )
-        if self.headers.has_key('content-length'):
-            length= int(self.headers['content-length'])
-            self.log_message('Length of content: {0}'.format(int(self.headers['content-length'])))
-            self.ingest_vlpro_alarm(self.rfile.read(length))
-        else:
-            self.ingest_vlpro_alarm(None)
-    def ingest_vlpro_alarm(self, moth):
-        self.log_message('Print Moth: {0}'.format(moth))
-        # formInput=None
-        #Take the alert from VLPro
-        response= "<html><head></head><body>"
-        response+= "<p>HTTP Request</p>"
-        response+= "<p>self.command= <tt>%s</tt></p>" % ( self.command )
-        response+= "<p>self.path= <tt>%s</tt></p>" % ( self.path )
-        response+= "</body></html>"
-        self.wfile.write(response)
+class MyHandler(PatternMatchingEventHandler):
+    patterns = ["*.xml", "*.lxml", "*.asr"]
+
+    def process(self, event):
+        """
+        event.event_type
+            'modified' | 'created' | 'moved' | 'deleted'
+        event.is_directory
+            True | False
+        event.src_path
+            path/to/observed/file
+        """
+        # the file will be processed there
+        print event.src_path, event.event_type  # print now only for degug
+
+    # def on_modified(self, event):
+    #     self.process(event)
+
+    def on_created(self, event):
+        self.process(event)
 
 def run(server_class=HTTPServer, handler_class=S, port=3000):
     server_address = ('', port)
@@ -58,7 +61,20 @@ def run(server_class=HTTPServer, handler_class=S, port=3000):
 
 if __name__ == "__main__":
     from sys import argv
-
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(message)s',
+    #                     datefmt='%Y-%m-%d %H:%M:%S')
+    path = '/AsRun' #sys.argv[1] if len(sys.argv) > 1 else '.'
+    event_handler = LoggingEventHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path, recursive=True)
+    observer.start()
+    try:
+        while True:
+            time.sleep(1000)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
     if len(argv) == 2:
         run(port=int(argv[1]))
     else:
