@@ -7,4 +7,4 @@ services:
     volumes:
       - type: bind
         source: ../AsRun
-        target: /opt/app/AsRun
+        target: /tmp/AsRun
